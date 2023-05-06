@@ -838,6 +838,7 @@ MonoBehaviour:
   speedUpFactor: 0.95
   speedUpInterval: 3
   scoreText: {fileID: 1362861980}
+  wordRemovedSound: {fileID: 8300000, guid: ec498ce7649edb34a9a35ef5022ef2bb, type: 3}
 --- !u!1001 &632861188719287214
 PrefabInstance:
   m_ObjectHideFlags: 0

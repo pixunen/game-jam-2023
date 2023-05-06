@@ -13,6 +13,7 @@ public class WordSpawner : MonoBehaviour
     public float speedUpFactor = 0.95f;
     public float speedUpInterval = 5f;
     public TextMeshProUGUI scoreText;
+    public AudioClip wordRemovedSound;
 
     private float nextSpeedUpTime;
     private TMP_Text currentWord;
@@ -23,6 +24,7 @@ public class WordSpawner : MonoBehaviour
     private int score = 0;
     private Sprite[] sprites;
     private int currentIndex = 0;
+    private AudioSource audioSource;
 
     private void Start()
     {
@@ -45,6 +47,11 @@ public class WordSpawner : MonoBehaviour
 
         // Update the score text
         scoreText.text = $"Score: {score}";
+    }
+
+    void Awake()
+    {
+        audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     private void SpeedUpSpawning()
@@ -159,6 +166,9 @@ public class WordSpawner : MonoBehaviour
 
         // Increment the score by 1
         score++;
+
+        // Play the sound effect
+        audioSource.PlayOneShot(wordRemovedSound, 0.5f);
     }
 
     private void ShuffleSprites()
