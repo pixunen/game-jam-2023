@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-
+using UnityEngine.UI;
+using UnityEngine.Events;
 public class WordSpawner : MonoBehaviour
 {
     public GameObject enemyPrefab;
@@ -14,7 +15,12 @@ public class WordSpawner : MonoBehaviour
     public float speedUpInterval = 5f;
     public TextMeshProUGUI scoreText;
     public AudioClip wordRemovedSound;
+    public int abilityActivationScore = 10;
+    public Button abilityButton;
+    public Image abilityProgressBar;
+    public LaserEffectController laserEffectController;
 
+    private int abilityBuildUp = 0;
     private float nextSpeedUpTime;
     private TMP_Text currentWord;
     private int currentWordIndex;
@@ -31,6 +37,7 @@ public class WordSpawner : MonoBehaviour
         timeToNextSpawn = spawnRate;
         nextSpeedUpTime = Time.time + speedUpInterval;
         sprites = Resources.LoadAll<Sprite>("monsters");
+        abilityButton.onClick.AddListener(ActivateAbility);
     }
 
     private void Update()
@@ -47,6 +54,8 @@ public class WordSpawner : MonoBehaviour
 
         // Update the score text
         scoreText.text = $"Score: {score}";
+
+        UpdateAbilityProgressBar();
     }
 
     void Awake()
@@ -169,6 +178,8 @@ public class WordSpawner : MonoBehaviour
 
         // Play the sound effect
         audioSource.PlayOneShot(wordRemovedSound, 0.5f);
+
+        abilityBuildUp++;
     }
 
     private void ShuffleSprites()
@@ -179,6 +190,42 @@ public class WordSpawner : MonoBehaviour
             Sprite temp = sprites[i];
             sprites[i] = sprites[randomIndex];
             sprites[randomIndex] = temp;
+        }
+    }
+
+    // Add this new function to update the ability progress bar
+    private void UpdateAbilityProgressBar()
+    {
+        float progress = (float)abilityBuildUp / abilityActivationScore;
+        abilityProgressBar.fillAmount = progress;
+        abilityButton.interactable = progress >= 1;
+    }
+
+    // Add this new function to activate the ability and clear all enemies from the queue
+    private void ActivateAbility()
+    {
+        if (abilityBuildUp >= abilityActivationScore)
+        {
+            RemoveAllEnemies(); // Add this line
+
+            abilityBuildUp = 0;
+
+            // Add this line to activate the laser effect
+            laserEffectController.ActivateLaser();
+        }
+    }
+    public void RemoveAllEnemies()
+    {
+        List<TMP_Text> wordsToRemove = new List<TMP_Text>(wordsQueue);
+        foreach (TMP_Text word in wordsToRemove)
+        {
+            GameObject enemy = word.GetComponent<WordInfo>().associatedEnemy;
+            if (enemy != null)
+            {
+                Destroy(enemy);
+            }
+            Destroy(word.gameObject);
+            wordsQueue.Remove(word);
         }
     }
 }
